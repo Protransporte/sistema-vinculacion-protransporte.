@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vista previa — Sistema de Vinculación Pro Transporte</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  /* Extra styles only for this demo (switcher + login + portal), no son parte del sistema real */
+  .demo-switch{position:sticky;top:0;z-index:200;background:#1c1c1c;color:#fff;display:flex;gap:0;font-size:12.5px;overflow-x:auto;}
+  .demo-switch button{flex:1;min-width:140px;background:none;border:none;color:#bbb;padding:11px 8px;cursor:pointer;font-weight:700;font-family:inherit;border-bottom:3px solid transparent;white-space:nowrap;}
+  .demo-switch button.on{color:#fff;border-color:var(--red);background:#000;}
+  .demo-note{background:#fff6df;color:#7a5b00;font-size:12px;padding:6px 14px;text-align:center;}
+  .view{display:none;}
+  .view.show{display:block;}
+  .mod{display:none;}
+  .mod.show{display:block;}
+  table.list tr{cursor:pointer;}
+
+  /* Login */
+  .login-wrap{min-height:80vh;display:flex;align-items:center;justify-content:center;background:#f5f4f2;padding:30px 16px;}
+  .login-box{background:#fff;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,.08);padding:34px 32px;width:100%;max-width:360px;border-top:5px solid #e2211c;}
+  .login-box img{height:56px;display:block;margin:0 auto 14px;}
+  .login-box h1{font-family:'Barlow Condensed',sans-serif;font-size:20px;text-align:center;margin:0 0 20px;text-transform:uppercase;}
+  .login-box label{display:block;font-size:12px;font-weight:600;color:#5a5a5a;margin-bottom:5px;}
+  .login-box input{width:100%;padding:10px 12px;border:1px solid #e2ded7;border-radius:4px;font:inherit;margin-bottom:14px;box-sizing:border-box;}
+  .login-box button{width:100%;background:#e2211c;color:#fff;border:none;padding:11px;border-radius:4px;font-weight:700;cursor:pointer;font-size:14px;}
+
+  /* Portal público */
+  .portal-wrap{max-width:720px;margin:0 auto;padding-bottom:60px;background:#f5f4f2;}
+  .portal-header{background:#1c1c1c;color:#fff;padding:22px;text-align:center;border-bottom:5px solid #e2211c;}
+  .portal-header img{height:54px;background:#fff;border-radius:6px;padding:5px;margin-bottom:8px;}
+  .portal-header h1{font-family:'Barlow Condensed',sans-serif;font-size:22px;margin:0;text-transform:uppercase;}
+  .portal-header p{margin:4px 0 0;color:#d8d5cf;font-size:13px;}
+  .portal-form{padding:20px;}
+  .portal-note{font-size:12.5px;color:#5a5a5a;background:#fff;border-left:3px solid #e2211c;padding:10px 12px;border-radius:2px;margin:16px 20px;}
+  .portal-grid{display:grid;gap:12px;grid-template-columns:1fr 1fr;}
+  @media(max-width:600px){.portal-grid{grid-template-columns:1fr;}}
+  .portal-doc-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e2ded7;border-radius:4px;margin-bottom:8px;background:#f5f4f2;flex-wrap:wrap;}
+  .btn-portal{background:#e2211c;color:#fff;border:none;padding:13px 22px;border-radius:4px;font-weight:700;cursor:pointer;font-size:15px;width:100%;}
+</style>
+</head>
+<body>
+
+<div class="demo-switch">
+  <button onclick="showView('portal',this)">👤 Lo que ve el TERCERO (portal público)</button>
+  <button onclick="showView('consultar',this)">🔄 Tercero actualizando sus documentos</button>
+  <button class="on" onclick="showView('dash',this)">🏢 Lo que ve QUIEN APRUEBA (panel interno)</button>
+  <button onclick="showView('login',this)">🔑 Pantalla de ingreso</button>
+</div>
+<div class="demo-note">Vista previa con datos de ejemplo — el sistema real se conecta a la base de datos cuando esté instalado en el hosting. Puedes hacer clic en las filas y pestañas.</div>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="view-login" class="view">
+  <div class="login-wrap">
+    <div class="login-box">
+      <img src="assets/logo.png" alt="Pro Transporte">
+      <h1>Vinculación Pro Transporte</h1>
+      <label>Usuario</label>
+      <input type="text" placeholder="usuario" disabled>
+      <label>Contraseña</label>
+      <input type="password" placeholder="••••••••" disabled>
+      <button type="button" disabled>Ingresar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PANEL INTERNO ===================== -->
+<div id="view-dash" class="view show">
+  <div class="demo-note" style="margin:0;">🏢 Esto es lo que ve QUIEN APRUEBA (tu equipo interno, con usuario y clave) — revisa, aprueba y hace seguimiento de todo lo que llega del portal.</div>
+  <div class="app">
+    <header>
+      <img src="assets/logo.png" alt="Pro Transporte">
+      <div>
+        <h1>Sistema de Vinculación</h1>
+        <p>Pro Transporte S.A.S.</p>
+      </div>
+      <div class="user-box">Isabel Polo &nbsp;|&nbsp; <a href="#" style="color:#fff;">Salir</a></div>
+    </header>
+
+    <div class="alert-panel">
+      <div class="alert-panel-head">⚠ Documentos próximos a vencer / vencidos</div>
+      <div class="alert-list">
+        <div class="alert-chip vencido">SOAT — Vehículo ABC123 — vencido</div>
+        <div class="alert-chip por_vencer">SARLAFT — Carlos Gómez — vence en 7 días</div>
+        <div class="alert-chip por_vencer">RUNT — Vehículo XYZ987 — vence en 15 días</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab tab-mod active" data-mod="personas" onclick="showTab('personas',this)">Personas</div>
+      <div class="tab tab-mod" data-mod="vehiculos" onclick="showTab('vehiculos',this)">Vehículos</div>
+      <div class="tab tab-mod" data-mod="clientes" onclick="showTab('clientes',this)">Clientes</div>
+    </div>
+
+    <div class="content">
+
+      <!-- PERSONAS -->
+      <div id="mod-personas" class="mod show">
+        <div class="toolbar">
+          <input type="text" id="buscarPersonas" placeholder="Buscar por nombre o documento..." oninput="filtrarTabla('personas')">
+          <select id="filtroRolPersona" onchange="filtrarTabla('personas')">
+            <option value="">Todos los roles</option>
+            <option value="Propietario">Propietario</option>
+            <option value="Proveedor">Proveedor</option>
+            <option value="Conductor">Conductor</option>
+            <option value="Contratista">Contratista</option>
+          </select>
+          <select id="filtroEstadoPersona" onchange="filtrarTabla('personas')">
+            <option value="">Todos los estados</option>
+            <option value="listo">Listo para Systram</option>
+            <option value="vencido">Con documentos vencidos</option>
+            <option value="por_vencer">Por vencer</option>
+          </select>
+          <button class="btn btn-primary" onclick="openPersonaModal()">+ Nueva persona</button>
+        </div>
+        <table class="list" id="tablaPersonas">
+          <tr><th>Nombre</th><th>Documento</th><th>Roles</th><th>Documentos</th><th>Estado</th></tr>
+          <tr onclick="openPersonaModal()" data-rol="Propietario,Conductor" data-estado="por_vencer" data-buscar="carlos gómez 71.234.567">
+            <td>Carlos Gómez</td>
+            <td>CC 71.234.567</td>
+            <td><span class="badge role">Propietario</span><span class="badge role">Conductor</span></td>
+            <td>7 / 8 aprobados</td>
+            <td><span class="badge warn">Por vencer</span></td>
+          </tr>
+          <tr onclick="openPersonaModal()" data-rol="Proveedor" data-estado="listo" data-buscar="transportes del valle 900.123.456">
+            <td>Transportes del Valle S.A.S.</td>
+            <td>NIT 900.123.456</td>
+            <td><span class="badge role">Proveedor</span></td>
+            <td>5 / 5 aprobados</td>
+            <td><span class="badge ok">Listo para Systram</span></td>
+          </tr>
+          <tr onclick="openPersonaModal()" data-rol="Conductor" data-estado="vencido" data-buscar="maría restrepo 43.998.221">
+            <td>María Restrepo</td>
+            <td>CC 43.998.221</td>
+            <td><span class="badge role">Conductor</span></td>
+            <td>3 / 6 aprobados</td>
+            <td><span class="badge err">Documentos vencidos</span></td>
+          </tr>
+          <tr onclick="openPersonaModal()" data-rol="Propietario" data-estado="listo" data-buscar="jorge londoño 15.887.432">
+            <td>Jorge Londoño</td>
+            <td>CC 15.887.432</td>
+            <td><span class="badge role">Propietario</span></td>
+            <td>5 / 5 aprobados</td>
+            <td><span class="badge ok">Listo para Systram</span></td>
+          </tr>
+        </table>
+        <div class="empty" id="vacioPersonas" style="display:none;">No hay resultados con ese filtro.</div>
+      </div>
+
+      <!-- VEHICULOS -->
+      <div id="mod-vehiculos" class="mod">
+        <div class="toolbar">
+          <input type="text" id="buscarVehiculos" placeholder="Buscar por placa..." oninput="filtrarTabla('vehiculos')">
+          <select id="filtroPropietarioVehiculo" onchange="filtrarTabla('vehiculos')">
+            <option value="">Todos los propietarios</option>
+            <option value="Jorge Londoño">Jorge Londoño</option>
+            <option value="Carlos Gómez">Carlos Gómez</option>
+            <option value="Transportes del Valle S.A.S.">Transportes del Valle S.A.S.</option>
+          </select>
+          <select id="filtroEstadoVehiculo" onchange="filtrarTabla('vehiculos')">
+            <option value="">Todos los estados</option>
+            <option value="listo">Listo para Systram</option>
+            <option value="vencido">Con documentos vencidos</option>
+            <option value="por_vencer">Por vencer</option>
+          </select>
+          <button class="btn btn-primary" onclick="openVehiculoModal()">+ Nuevo vehículo</button>
+        </div>
+        <table class="list" id="tablaVehiculos">
+          <tr><th>Placa</th><th>Marca / Línea</th><th>Propietario</th><th>Documentos</th><th>Estado</th></tr>
+          <tr onclick="openVehiculoModal()" data-propietario="Jorge Londoño" data-estado="vencido" data-buscar="abc123">
+            <td>ABC123</td>
+            <td>Chevrolet NPR</td>
+            <td>Jorge Londoño</td>
+            <td>6 / 7 aprobados</td>
+            <td><span class="badge err">SOAT vencido</span></td>
+          </tr>
+          <tr onclick="openVehiculoModal()" data-propietario="Carlos Gómez" data-estado="por_vencer" data-buscar="xyz987">
+            <td>XYZ987</td>
+            <td>Hino 300</td>
+            <td>Carlos Gómez</td>
+            <td>6 / 7 aprobados</td>
+            <td><span class="badge warn">RUNT por vencer</span></td>
+          </tr>
+          <tr onclick="openVehiculoModal()" data-propietario="Transportes del Valle S.A.S." data-estado="listo" data-buscar="jkl456">
+            <td>JKL456</td>
+            <td>Kenworth T370</td>
+            <td>Transportes del Valle S.A.S.</td>
+            <td>7 / 7 aprobados</td>
+            <td><span class="badge ok">Listo para Systram</span></td>
+          </tr>
+        </table>
+        <div class="empty" id="vacioVehiculos" style="display:none;">No hay resultados con ese filtro.</div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div id="mod-clientes" class="mod">
+        <div class="toolbar">
+          <input type="text" id="buscarClientes" placeholder="Buscar por NIT o razón social..." oninput="filtrarTabla('clientes')">
+          <select id="filtroEstadoCliente" onchange="filtrarTabla('clientes')">
+            <option value="">Todos los estados</option>
+            <option value="listo">Listo para Systram</option>
+            <option value="pendiente">Pendiente de revisión</option>
+          </select>
+          <button class="btn btn-primary" onclick="openClienteModal()">+ Nuevo cliente</button>
+        </div>
+        <table class="list" id="tablaClientes">
+          <tr><th>Razón social</th><th>NIT</th><th>Documentos</th><th>Estado</th></tr>
+          <tr onclick="openClienteModal()" data-estado="listo" data-buscar="almacenes éxito 890.900.608">
+            <td>Almacenes Éxito S.A.</td>
+            <td>890.900.608</td>
+            <td>6 / 6 aprobados</td>
+            <td><span class="badge ok">Listo para Systram</span></td>
+          </tr>
+          <tr onclick="openClienteModal()" data-estado="pendiente" data-buscar="comercializadora andina 900.456.789">
+            <td>Comercializadora Andina SAS</td>
+            <td>900.456.789</td>
+            <td>4 / 6 aprobados</td>
+            <td><span class="badge warn">Pendiente de revisión</span></td>
+          </tr>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===================== PORTAL PÚBLICO ===================== -->
+<div id="view-portal" class="view">
+  <div class="demo-note" style="margin:0;">👤 Esto es lo que ve un TERCERO (propietario, conductor, proveedor, contratista o cliente) cuando entra a registrarse — es público, no necesita usuario ni clave.</div>
+  <div class="portal-wrap">
+    <div class="portal-header">
+      <img src="assets/logo.png" alt="Pro Transporte">
+      <h1>Portal de vinculación</h1>
+      <p>Regístrate como propietario, conductor o proveedor de Pro Transporte S.A.S</p>
+    </div>
+    <div class="portal-note">Al enviar este formulario, tu información queda <b>pendiente de revisión</b> por nuestro equipo. Te contactaremos una vez quede aprobada.</div>
+
+    <div class="portal-form">
+      <div class="section"><h3>¿Qué tipo de registro vas a hacer?</h3><div class="body">
+        <div class="roles-pick" id="tipoRegistroPick">
+          <div class="role-chip on" onclick="setTipoRegistro('persona', this)">Persona (Propietario / Proveedor / Conductor / Contratista)</div>
+          <div class="role-chip" onclick="setTipoRegistro('cliente', this)">Cliente (empresa)</div>
+        </div>
+      </div></div>
+
+      <!-- PERSONA -->
+      <div id="formPersona">
+        <div class="section"><h3>Tus datos</h3><div class="body">
+          <div class="portal-grid">
+            <div><label>Tipo de identificación</label><select><option>CC</option><option>CE</option><option>NIT</option></select></div>
+            <div><label>Número de documento *</label><input type="text" placeholder="Ej: 71.234.567"></div>
+          </div>
+          <div class="portal-grid" style="margin-top:12px;">
+            <div><label>Nombres *</label><input type="text" placeholder="Nombres"></div>
+            <div><label>Apellidos *</label><input type="text" placeholder="Apellidos"></div>
+          </div>
+          <div class="portal-grid" style="margin-top:12px;">
+            <div><label>Correo *</label><input type="email" placeholder="correo@ejemplo.com"></div>
+            <div><label>Teléfono *</label><input type="tel" placeholder="300 000 0000"></div>
+          </div>
+        </div></div>
+
+        <div class="section"><h3>¿Con qué rol te vinculas?</h3><div class="body">
+          <div class="roles-pick" id="portalRoles">
+            <div class="role-chip" data-role="Propietario" onclick="portalToggleRole('Propietario', this)">Propietario</div>
+            <div class="role-chip" data-role="Proveedor" onclick="portalToggleRole('Proveedor', this)">Proveedor</div>
+            <div class="role-chip" data-role="Conductor" onclick="portalToggleRole('Conductor', this)">Conductor</div>
+            <div class="role-chip" data-role="Contratista" onclick="portalToggleRole('Contratista', this)">Contratista</div>
+          </div>
+        </div></div>
+
+        <div class="section"><h3>Documentos</h3><div class="body" id="portalDocsBody">
+          <div class="portal-note" style="margin:0;">Selecciona primero tu rol para ver qué documentos debes adjuntar.</div>
+        </div></div>
+
+        <button type="button" class="btn-portal" disabled>Enviar registro</button>
+      </div>
+
+      <!-- CLIENTE -->
+      <div id="formCliente" style="display:none;">
+        <div class="section"><h3>Datos del cliente</h3><div class="body">
+          <div class="portal-grid">
+            <div><label>NIT *</label><input type="text" placeholder="900.123.456"></div>
+            <div><label>Razón social *</label><input type="text" placeholder="Nombre de la empresa"></div>
+          </div>
+          <div class="portal-grid" style="margin-top:12px;">
+            <div><label>Dirección</label><input type="text"></div>
+            <div><label>Población / Municipio</label><input type="text"></div>
+          </div>
+        </div></div>
+        <div class="section"><h3>Contacto</h3><div class="body">
+          <div class="portal-grid">
+            <div><label>Nombre del contacto</label><input type="text"></div>
+            <div><label>Teléfono *</label><input type="tel"></div>
+          </div>
+          <div class="portal-grid" style="margin-top:12px;">
+            <div><label>Correo *</label><input type="email"></div>
+            <div></div>
+          </div>
+        </div></div>
+        <div class="section"><h3>Documentos</h3><div class="body" id="clienteDocsBody"></div></div>
+        <button type="button" class="btn-portal" disabled>Enviar registro</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== CONSULTAR/ACTUALIZAR (tercero ya registrado) ===================== -->
+<div id="view-consultar" class="view">
+  <div class="demo-note" style="margin:0;">👤 Esto es lo que ve un TERCERO que YA SE REGISTRÓ y vuelve a actualizar un documento (ej: su SOAT se venció) — sin llenar el formulario completo otra vez.</div>
+  <div class="portal-wrap">
+    <div class="portal-header">
+      <img src="assets/logo.png" alt="Pro Transporte">
+      <h1>Mis documentos</h1>
+      <p>Consulta tu estado y actualiza tus documentos</p>
+    </div>
+    <div class="portal-note">Ejemplo: Jorge Londoño consulta con su cédula y correo, y ve que su SOAT está vencido.</div>
+    <div class="portal-form">
+      <div class="section"><h3>Identifícate</h3><div class="body">
+        <div class="portal-grid">
+          <div><label>Número de documento</label><input type="text" value="15.887.432" disabled></div>
+          <div><label>Correo registrado</label><input type="email" value="jorge.londono@correo.com" disabled></div>
+        </div>
+      </div></div>
+      <div class="section"><h3>Jorge Londoño</h3><div class="body">
+        <div style="margin-bottom:12px;"><span class="badge warn">Por vencer</span></div>
+        <div class="doc-row ok"><div><div class="name">Cédula</div><div class="sub">Aprobado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+        <div class="doc-row ok"><div><div class="name">RUT</div><div class="sub">Aprobado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+        <div class="doc-row ok"><div><div class="name">Cuenta bancaria</div><div class="sub">Aprobado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+        <div class="doc-row vencido">
+          <div><div class="name">SOAT</div><div class="sub">Venció el 15 ago 2026</div></div>
+          <div class="doc-actions">
+            <span class="badge err">Vencido</span>
+            <input type="date" disabled>
+            <span style="font-size:12px;color:#5a5a5a;">[ Seleccionar archivo ]</span>
+            <button class="btn btn-sm btn-primary" type="button">Actualizar</button>
+          </div>
+        </div>
+        <div class="doc-row ok"><div><div class="name">SIMIT</div><div class="sub">Aprobado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODALES ===================== -->
+
+<!-- PERSONA MODAL -->
+<div id="overlay-persona" class="overlay" onclick="if(event.target===this) closeModal('persona')">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Carlos Gómez</h2>
+      <button class="modal-close" onclick="closeModal('persona')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="section">
+        <h3>Datos básicos</h3>
+        <div class="body grid g3">
+          <div><label>Tipo de documento</label><input type="text" value="CC" disabled></div>
+          <div><label>Número de documento</label><input type="text" value="71.234.567" disabled></div>
+          <div><label>Tipo de persona</label><input type="text" value="Natural" disabled></div>
+          <div><label>Nombres</label><input type="text" value="Carlos" disabled></div>
+          <div><label>Apellidos</label><input type="text" value="Gómez" disabled></div>
+          <div><label>Correo</label><input type="text" value="carlos.gomez@correo.com" disabled></div>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Roles</h3>
+        <div class="body">
+          <div class="roles-pick">
+            <div class="role-chip on">Propietario</div>
+            <div class="role-chip on">Conductor</div>
+            <div class="role-chip">Proveedor</div>
+          </div>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Documentos (checklist combinado de sus roles)</h3>
+        <div class="body">
+          <div class="doc-row ok"><div><div class="name">Cédula</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">RUT</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Cuenta bancaria</div><div class="sub">Verificada</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row por_vencer"><div><div class="name">SARLAFT</div><div class="sub">Vence el 08 oct 2026</div></div><div class="doc-actions"><span class="badge warn">Por vencer</span></div></div>
+          <div class="doc-row ok"><div><div class="name">SIMIT</div><div class="sub">Cargado por logística</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Licencia de conducción</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">ARL y EPS</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Manipulación de alimentos</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row vencido"><div><div class="name">RUNT</div><div class="sub">Falta cargar — pendiente de logística</div></div><div class="doc-actions"><span class="badge err">Pendiente</span></div></div>
+        </div>
+      </div>
+      <div class="status-line">7 de 8 documentos aprobados — falta el RUNT (lo carga logística) para quedar listo para Systram.</div>
+    </div>
+    <div class="modal-foot">
+      <span class="badge warn">Por vencer</span>
+      <button class="btn btn-ghost" onclick="closeModal('persona')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- VEHICULO MODAL -->
+<div id="overlay-vehiculo" class="overlay" onclick="if(event.target===this) closeModal('vehiculo')">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Vehículo — ABC123</h2>
+      <button class="modal-close" onclick="closeModal('vehiculo')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="section">
+        <h3>Datos del vehículo</h3>
+        <div class="body grid g3">
+          <div><label>Placa</label><input type="text" value="ABC123" disabled></div>
+          <div><label>Marca</label><input type="text" value="Chevrolet" disabled></div>
+          <div><label>Línea</label><input type="text" value="NPR" disabled></div>
+          <div><label>Modelo</label><input type="text" value="2019" disabled></div>
+          <div><label>Servicio</label><input type="text" value="Público" disabled></div>
+          <div><label>Propio / Tercero</label><input type="text" value="Propio" disabled></div>
+          <div style="grid-column:1/-1;"><label>Propietario vinculado</label><input type="text" value="Jorge Londoño — CC 15.887.432" disabled></div>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Documentos del vehículo</h3>
+        <div class="body">
+          <div class="doc-row ok"><div><div class="name">Matrícula</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row vencido"><div><div class="name">SOAT</div><div class="sub">Venció el 15 ago 2026</div></div><div class="doc-actions"><span class="badge err">Vencido</span></div></div>
+          <div class="doc-row por_vencer"><div><div class="name">RUNT</div><div class="sub">Vence el 20 oct 2026</div></div><div class="doc-actions"><span class="badge warn">Por vencer</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Póliza</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Thermo</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Sanidad</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Fumigación</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Revisión tecno-mecánica</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Plataforma GPS (usuario y contraseña)</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Fotos del vehículo</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+        </div>
+      </div>
+      <div class="status-line">9 de 10 documentos aprobados — no está listo para Systram por el SOAT vencido.</div>
+    </div>
+    <div class="modal-foot">
+      <span class="badge err">No listo para Systram</span>
+      <button class="btn btn-ghost" onclick="closeModal('vehiculo')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENTE MODAL -->
+<div id="overlay-cliente" class="overlay" onclick="if(event.target===this) closeModal('cliente')">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Almacenes Éxito S.A.</h2>
+      <button class="modal-close" onclick="closeModal('cliente')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="section">
+        <h3>Datos del cliente</h3>
+        <div class="body grid g2">
+          <div><label>NIT</label><input type="text" value="890.900.608" disabled></div>
+          <div><label>Razón social</label><input type="text" value="Almacenes Éxito S.A." disabled></div>
+          <div style="grid-column:1/-1;"><label>Dirección</label><input type="text" value="Cra 43A # 1 Sur - 45, Medellín" disabled></div>
+        </div>
+      </div>
+      <div class="section">
+        <h3>Documentos del cliente</h3>
+        <div class="body">
+          <div class="doc-row ok"><div><div class="name">Cédula representante</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">RUT</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Cámara de comercio</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">SARLAFT</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Requisitos cliente</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+          <div class="doc-row ok"><div><div class="name">Formulario de vinculación</div><div class="sub">Cargado</div></div><div class="doc-actions"><span class="badge ok">Aprobado</span></div></div>
+        </div>
+      </div>
+      <div class="status-line">6 de 6 documentos aprobados — listo para Systram.</div>
+    </div>
+    <div class="modal-foot">
+      <span class="badge ok">Listo para Systram</span>
+      <button class="btn btn-ghost" onclick="closeModal('cliente')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showView(name, btn){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('show'));
+  document.getElementById('view-' + name).classList.add('show');
+  document.querySelectorAll('.demo-switch button').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function showTab(mod, el){
+  document.querySelectorAll('.mod').forEach(m => m.classList.remove('show'));
+  document.getElementById('mod-' + mod).classList.add('show');
+  document.querySelectorAll('.tab-mod').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function filtrarTabla(tipo){
+  const cfg = {
+    personas:   { tabla:'tablaPersonas', buscar:'buscarPersonas', vacio:'vacioPersonas', extra:(tr)=>{
+      const rol = document.getElementById('filtroRolPersona').value;
+      const est = document.getElementById('filtroEstadoPersona').value;
+      if (rol && !(tr.dataset.rol||'').split(',').includes(rol)) return false;
+      if (est && tr.dataset.estado !== est) return false;
+      return true;
+    }},
+    vehiculos:  { tabla:'tablaVehiculos', buscar:'buscarVehiculos', vacio:'vacioVehiculos', extra:(tr)=>{
+      const prop = document.getElementById('filtroPropietarioVehiculo').value;
+      const est = document.getElementById('filtroEstadoVehiculo').value;
+      if (prop && tr.dataset.propietario !== prop) return false;
+      if (est && tr.dataset.estado !== est) return false;
+      return true;
+    }},
+    clientes:   { tabla:'tablaClientes', buscar:'buscarClientes', vacio:'vacioClientes', extra:(tr)=>{
+      const est = document.getElementById('filtroEstadoCliente').value;
+      if (est && tr.dataset.estado !== est) return false;
+      return true;
+    }},
+  }[tipo];
+  const texto = document.getElementById(cfg.buscar).value.trim().toLowerCase();
+  const filas = Array.from(document.querySelectorAll('#' + cfg.tabla + ' tr[data-buscar]'));
+  let visibles = 0;
+  filas.forEach(tr => {
+    const coincideTexto = !texto || (tr.dataset.buscar||'').includes(texto);
+    const coincideFiltros = cfg.extra(tr);
+    const mostrar = coincideTexto && coincideFiltros;
+    tr.style.display = mostrar ? '' : 'none';
+    if (mostrar) visibles++;
+  });
+  const vacio = document.getElementById(cfg.vacio);
+  if (vacio) vacio.style.display = visibles ? 'none' : 'block';
+}
+
+function openPersonaModal(){ document.getElementById('overlay-persona').classList.add('show'); }
+function openVehiculoModal(){ document.getElementById('overlay-vehiculo').classList.add('show'); }
+function openClienteModal(){ document.getElementById('overlay-cliente').classList.add('show'); }
+function closeModal(name){ document.getElementById('overlay-' + name).classList.remove('show'); }
+
+// Portal público: documentos requeridos por rol (SARLAFT/SIMIT/RUNT del Conductor
+// los carga logística, no se piden aquí)
+const PORTAL_ROLE_DOCS = {
+  Propietario: ['Cédula','RUT','Cuenta bancaria','SARLAFT','SIMIT'],
+  Proveedor:   ['Cuenta bancaria','Cédula','RUT','Cámara de comercio','Formato de registro','SARLAFT'],
+  Conductor:   ['Cédula','Licencia de conducción','ARL y EPS','Manipulación de alimentos'],
+  Contratista: ['Cédula','RUT','Cuenta bancaria','Contrato firmado','ARL y EPS','SARLAFT']
+};
+const CLIENTE_DOCS = ['Cédula representante','RUT','Cámara de comercio','SARLAFT','Requisitos cliente','Formulario de vinculación'];
+let portalRoles = [];
+
+function setTipoRegistro(tipo, chip){
+  document.querySelectorAll('#tipoRegistroPick .role-chip').forEach(c => c.classList.remove('on'));
+  chip.classList.add('on');
+  document.getElementById('formPersona').style.display = tipo === 'persona' ? 'block' : 'none';
+  document.getElementById('formCliente').style.display = tipo === 'cliente' ? 'block' : 'none';
+  if (tipo === 'cliente') renderClienteDocs();
+}
+function renderClienteDocs(){
+  const body = document.getElementById('clienteDocsBody');
+  body.innerHTML = CLIENTE_DOCS.map(d => `
+    <div class="portal-doc-row">
+      <div><b>${d}</b></div>
+      <div style="font-size:12px;color:#5a5a5a;">[ Seleccionar archivo ]</div>
+    </div>`).join('');
+}
+function portalToggleRole(role, chip){
+  const i = portalRoles.indexOf(role);
+  if (i >= 0) portalRoles.splice(i, 1); else portalRoles.push(role);
+  chip.classList.toggle('on');
+  renderPortalDocs();
+}
+function renderPortalDocs(){
+  const set = new Set();
+  portalRoles.forEach(r => (PORTAL_ROLE_DOCS[r] || []).forEach(d => set.add(d)));
+  const body = document.getElementById('portalDocsBody');
+  if (!set.size){ body.innerHTML = '<div class="portal-note" style="margin:0;">Selecciona primero tu rol para ver qué documentos debes adjuntar.</div>'; return; }
+  body.innerHTML = Array.from(set).map(d => `
+    <div class="portal-doc-row">
+      <div><b>${d}</b></div>
+      <div style="font-size:12px;color:#5a5a5a;">[ Seleccionar archivo ]</div>
+    </div>`).join('');
+}
+</script>
+
+</body>
+</html>
